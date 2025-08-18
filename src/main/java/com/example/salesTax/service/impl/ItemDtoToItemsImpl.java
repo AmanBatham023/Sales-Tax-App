@@ -1,7 +1,9 @@
 package com.example.salesTax.service.impl;
 
 import com.example.salesTax.dto.ItemDto;
+import com.example.salesTax.entity.CodeConstants;
 import com.example.salesTax.service.ItemsDtoToItem;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,9 @@ import java.util.regex.Pattern;
 @Service
 public class ItemDtoToItemsImpl implements ItemsDtoToItem {
     private static final Pattern INPUT_PATTERN = Pattern.compile("(\\d+)\\s(.*)\\sat\\s(\\d+\\.\\d{2})");
+
+    @Autowired
+    CodeConstants codeConstants;
 
     private List<String> exemptKeywords;
 
@@ -36,7 +41,7 @@ public class ItemDtoToItemsImpl implements ItemsDtoToItem {
 
             boolean isImported = name.contains("imported");
             boolean isExempt = exemptKeywords.stream().anyMatch(name::contains);
-           items.add(new ItemDto(quantity, name, price, isImported, isExempt));
+           items.add(new ItemDto(codeConstants, quantity, name, price, isImported, isExempt));
         }
         return items;
     }

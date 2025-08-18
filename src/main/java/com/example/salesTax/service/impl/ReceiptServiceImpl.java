@@ -5,7 +5,6 @@ import com.example.salesTax.dto.ItemReceiptDto;
 import com.example.salesTax.dto.Receipt;
 import com.example.salesTax.service.ItemsDtoToItem;
 import com.example.salesTax.service.ReceiptService;
-import com.example.salesTax.service.TaxCalcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +18,6 @@ public class ReceiptServiceImpl  implements ReceiptService {
 
     @Autowired
     ItemsDtoToItem itemsDtoToItem;
-
-    @Autowired
-    TaxCalcService taxCalcService;
     public Receipt getReceipt(List<String> inputData){
         Receipt receipt = new Receipt();
         List<ItemDto> items = itemsDtoToItem.parse(inputData);
@@ -30,13 +26,10 @@ public class ReceiptServiceImpl  implements ReceiptService {
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         for(ItemDto item: items){
-            BigDecimal salesTax = taxCalcService.calcTax(item);
-            BigDecimal finalPrice = item.getItemPrice().add(salesTax);
-
+            BigDecimal finalPrice = item.getFinalPrice(item);
             String receiptItemName = String.format("%d %s", item.getItemQuantity(), item.getItemName());
             itemReceiptDtos.add(new ItemReceiptDto(receiptItemName, finalPrice.setScale(2, RoundingMode.HALF_UP)));
-
-            totalSalesTax = totalSalesTax.add(salesTax);
+            totalSalesTax = totalSalesTax.add(item.salesTaxAmount());
             totalAmount = totalAmount.add(finalPrice);
         }
         receipt.setItems(itemReceiptDtos);
